@@ -9,10 +9,31 @@ public class Hero : MonoBehaviour, IObservable {
     NavMeshAgent agent;
 
     public GameObject bloodParticleSys;
+    public Rigidbody rb;
 
     public List<IObserver> observers = new List<IObserver>();
 
-	void Start ()
+    public Vector3 Velocity
+    {
+        get { return rb.velocity; }
+    }
+
+    public Vector3 Position
+    {
+        get { return rb.position; }
+    }
+
+    public Vector3 Direction
+    {
+        get { return transform.forward; }
+    }
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+    }
+
+    void Start ()
     {
         agent = GetComponent<NavMeshAgent>();
 	}

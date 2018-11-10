@@ -1,8 +1,9 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Patrol : MonoBehaviour {
+public class PatrolWonder : MonoBehaviour
+{
 
     public FSM<Feed> stateMachine;
 
@@ -19,14 +20,14 @@ public class Patrol : MonoBehaviour {
     public GameObject explosionParticle;
     public GameObject spotLight;
 
-    void Start ()
+    void Start()
     {
         animator = GetComponent<Animator>();
 
-        var patrol = new PatrolState<Feed>(waypoints, threshold, speed, this.transform);
+        var patrol = new WonderState<Feed>(threshold, speed, this.transform, this.GetComponent<PatrolWonder>());
         var chase = new ChaseState<Feed>(this.transform, target, speed);
         var alert = new AlertState<Feed>(spotLight, this.GetComponent<Patrol>());
-        var meleeattack = new PatrolAttackState<Feed>( this.transform);
+        var meleeattack = new PatrolAttackState<Feed>(this.transform);
 
         patrol.AddTransition(Feed.EnemigoEntraEnLOS, chase);
 
@@ -42,11 +43,11 @@ public class Patrol : MonoBehaviour {
         stateMachine = new FSM<Feed>(patrol);
 
         los = GetComponent<LOS>();
-        
-	}
-	
 
-	void Update ()
+    }
+
+
+    void Update()
     {
         stateMachine.Update();
 
@@ -56,7 +57,7 @@ public class Patrol : MonoBehaviour {
         {
             stateMachine.Feed(Feed.EnemigoEntraEnLOS);
 
-            if(distance < 1.5f)
+            if (distance < 1.5f)
             {
                 stateMachine.Feed(Feed.EntraEnRangoDeAtaque);
                 Instantiate(explosionParticle, transform.position, transform.rotation);
@@ -71,14 +72,4 @@ public class Patrol : MonoBehaviour {
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        if (waypoints == null || waypoints.Count <= 1) return;
-
-        Gizmos.color = Color.green;
-        for (int i = 1; i < waypoints.Count; i++)
-        {
-            GizmosExtension.DrawArrow(waypoints[i - 1].position, waypoints[i].position);
-        }
-    }
 }
