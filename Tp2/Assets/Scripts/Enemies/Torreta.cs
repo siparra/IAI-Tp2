@@ -179,6 +179,11 @@ public enum Feed
     NoHayEnemigos,
 
     //transiciones de Mine
-    BOOOOM
+    BOOOOM,
+
+    //Transiciones de Alerter
+    Alarma
+
+    
 }
 

@@ -32,6 +32,7 @@ public class PathFindingBFS : MonoBehaviour {
         var current = listaDeNodos[currentIndex];
         var direction = (current.transform.position - transform.position).normalized;
         var distance = Vector3.Distance(transform.position, current.transform.position);
+
         transform.position += direction * speed * Time.deltaTime;
 
         if(distance < threshold)
@@ -65,7 +66,7 @@ public class PathFindingBFS : MonoBehaviour {
         return current.vecinos;
     }
     //Aca termina BFS
-
+    /*
     /// <summary>
     /// Esto es para Astar
     /// </summary>
@@ -82,4 +83,5 @@ public class PathFindingBFS : MonoBehaviour {
     //{
     //    var 
     //}
+    */
 }
