@@ -9,16 +9,21 @@ public class Alerter : MonoBehaviour, IObservable {
 
     public Transform target;
 
+    public GameObject smokeEffect;
     public GameObject explosionParticle;
-    public GameObject spotLight;
+    //public GameObject spotLight;
     //------------- PATHFINDING --------------------
     public Node initialNode;
     public Node finalNode;
 
-    public Node nodoRata;
+    public Node nodoAlerta;
 
     public List<Node> listaDeNodos = new List<Node>();
-    private int currentIndex;
+    public int currentIndex;
+
+    //----- List of Alerters ----
+    public List<Alerter> listOfAlerters;
+    public bool estaAlerta;
 
     //-----Observers-------
     private List<IObserver> _listOfObservers = new List<IObserver>();
@@ -33,27 +38,35 @@ public class Alerter : MonoBehaviour, IObservable {
     void Start()
     {
         var patrol = new AlerterPatrolState<Feed>(listaDeNodos,speed,threshold,initialNode,finalNode,this.transform,this,alertManager);
+        var alarm = new AlerterAlarmState<Feed>(patrol, listOfAlerters);
+        var chase = new AlerterChaseState<Feed>(this.transform, target, speed);
+        //var alert = new AlertState<Feed>(spotLight, this.GetComponent<Patrol>());
+        patrol.AddTransition(Feed.EnemigoEntraEnLOS, alarm);
 
-        var chase = new ChaseState<Feed>(this.transform, target, speed);
-        var alert = new AlertState<Feed>(spotLight, this.GetComponent<Patrol>());
-        var meleeattack = new PatrolAttackState<Feed>(this.transform);
+        alarm.AddTransition(Feed.EnemigoEntraEnLOS, chase);
 
-        patrol.AddTransition(Feed.EnemigoEntraEnLOS, chase);
+        //SERGIO!!! Le reordene esta parte, porque meleeattack triggerea el estado broken, 
+        //y para eso necesito que la state machine este creada de antemano.
+        stateMachine = new FSM<Feed>(patrol);
 
-        chase.AddTransition(Feed.EnemigoSaleDeLOS, alert);
+        var meleeattack = new AlerterAttackState<Feed>(this.transform,stateMachine,explosionParticle);
+        var broken = new AlerterBrokenState<Feed>(smokeEffect,this);
+
+        //chase.AddTransition(Feed.EnemigoSaleDeLOS, alert);
         chase.AddTransition(Feed.EntraEnRangoDeAtaque, meleeattack);
 
-        alert.AddTransition(Feed.EnemigoEntraEnLOS, chase);
-        alert.AddTransition(Feed.NoHayEnemigos, patrol);
+        //alert.AddTransition(Feed.EnemigoEntraEnLOS, chase);
+        //alert.AddTransition(Feed.NoHayEnemigos, patrol);
 
         meleeattack.AddTransition(Feed.SaleDeRangoDeAtaque, chase);
-        meleeattack.AddTransition(Feed.EnemigoSaleDeLOS, alert);
+        //meleeattack.AddTransition(Feed.EnemigoSaleDeLOS, alert);
+        meleeattack.AddTransition(Feed.BOOOOM, broken);
 
-        stateMachine = new FSM<Feed>(patrol);
+        
 
         los = GetComponent<LOS>();
 
-        
+        estaAlerta = false;
 
     }
 
@@ -73,8 +86,9 @@ public class Alerter : MonoBehaviour, IObservable {
             if (distance < 1.5f)
             {
                 stateMachine.Feed(Feed.EntraEnRangoDeAtaque);
-                Instantiate(explosionParticle, transform.position, transform.rotation);
-                Destroy(gameObject);
+                //Instantiate(explosionParticle, transform.position, transform.rotation);
+                //Instantiate(smokeEffect, transform.position, transform.rotation);
+                //Destroy(gameObject);
 
             }
         }
@@ -83,6 +97,7 @@ public class Alerter : MonoBehaviour, IObservable {
         {
             stateMachine.Feed(Feed.EnemigoSaleDeLOS);
         }
+
     }
 
     public void AddObserver(IObserver obs)
@@ -108,4 +123,6 @@ public class Alerter : MonoBehaviour, IObservable {
             observer.OnNotify(triggermessage);
         }
     }
+
+    
 }

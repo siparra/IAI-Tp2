@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AlerterPatrolState<T> : State<T> {
-    private List<Node> _listaDeNodos = new List<Node>();
-    private int _currentIndex;
+    public List<Node> _listaDeNodos = new List<Node>();
+    public int _currentIndex;
     
     private float _speed;
     private float _threshold;
@@ -23,20 +23,22 @@ public class AlerterPatrolState<T> : State<T> {
         {
             _listaDeNodos.Add(n);
         }
-
+        
         _speed = speed;
         _threshold = threshold;
         _initialNode = initialNode;
         _modelTransform = modelTransform;
         _alerter = alerter;
-        this.Enter(); //Posible Cambio!
+        
         _alertManager = alertManager;
-        _alerter.nodoRata = finalNode;
+        _alerter.nodoAlerta = finalNode;
+        _currentIndex = 0;
+        this.Enter(); //Posible Cambio!
     }
 
     public bool satisfy(Node node)
     {
-        if (node.Equals(_alerter.nodoRata))//CAMBIAR DESPUES
+        if (node.Equals(_alerter.nodoAlerta))//CAMBIAR DESPUES
             return true;
         else
             return false;
@@ -87,13 +89,26 @@ public class AlerterPatrolState<T> : State<T> {
                 
         }
 
+        if (_alerter.estaAlerta)
+        {
+            RecalcularCamino();
+        }
+
     }
 
     public override void Exit()
     {
         //Esto lo cambiamos. Actualizar el current node del alert manager.
-        _alertManager.currentNode = _listaDeNodos[_currentIndex];
+        //_alertManager.currentNode = _listaDeNodos[_currentIndex];
+        _alerter.currentIndex = _currentIndex;
         _alerter.Trigger("HeroInSight");
     }
 
+    private List<Node> RecalcularCamino()
+    {
+        _listaDeNodos = BFS.Run(_initialNode, satisfy, ExpandBFS);
+        _alerter.estaAlerta = false;
+
+        return _listaDeNodos;
+    }
 }

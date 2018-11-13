@@ -21,7 +21,7 @@ public class AlerterManager : MonoBehaviour, IObserver {
         {
             foreach (Alerter alerter in listOfEnemies)
             {
-                alerter.nodoRata = currentNode; //Actualiza el nodo Rata para los Enemigos en estado PATROL
+                //alerter.nodoRata = currentNode; //Actualiza el nodo Rata para los Enemigos en estado PATROL
             }
         }
     }

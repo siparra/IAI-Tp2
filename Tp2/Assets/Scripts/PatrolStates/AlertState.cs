@@ -24,7 +24,6 @@ public class AlertState<T>:State<T>
     {
         Debug.Log("Actualmente en Alert State");
         _contador += Time.deltaTime;
-        Debug.Log(_contador);
         if (_contador > 5f)
         {
             _patrol.stateMachine.Feed(Feed.NoHayEnemigos);
